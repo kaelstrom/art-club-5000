@@ -11,6 +11,8 @@ class GalleryCompare(object):
         self.generate_backdrop()
         
     def set_images(self, image_a, image_b):
+        self.image_a_prev = self.image_a
+        self.image_b_prev = self.image_b
         self.image_a = image_a
         self.image_b = image_b
         
