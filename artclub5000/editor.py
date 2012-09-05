@@ -1,12 +1,15 @@
 import pygame, image
 
 class Editor(object):
-    def __init__(self):
+    def __init__(self, font):
+        self.font = font
         self.activecolor=(255,0,0)
         self.activetool = ''
         self.image = image.Image()
         self.imagerect = self.image.surf.get_rect().move(192+144, 120)
         self.image.reset()
+        self.image.soul = 1
+        self.done = False
         
         self.color1 = (255,0,0)
         self.color2 = (0,255,0)
@@ -33,7 +36,18 @@ class Editor(object):
         pygame.draw.circle(self.tool2surf, (255,255,255), (32,32), 24)
         self.tool2rect = self.color1surf.get_rect().move(64, 72*6)
         
+        self.donesurf = self.font.render('DONE', True, (50,50,50))
+        self.donerect = self.donesurf.get_rect().inflate(20,20)
+        self.donesurf = pygame.Surface((self.donerect.width, self.donerect.height))
+        self.donesurf.fill((255,255,255))
+        self.donesurf.blit(self.font.render('DONE', True, (50,50,50)), (10,10))
+        self.donerect.center = self.imagerect.center
+        self.donerect.top = 72*6
+        
     def mouse_click(self, pos):
+        if self.done:
+            return
+    
         if self.color1rect.collidepoint(pos):
             self.activecolor = self.color1
         if self.color2rect.collidepoint(pos):
@@ -48,6 +62,10 @@ class Editor(object):
             
         if self.imagerect.collidepoint(pos):
             self.activetool(pos[0]-self.imagerect.x, pos[1]-self.imagerect.y, self.activecolor)
+            
+        if self.donerect.collidepoint(pos):
+            self.done = True
+            print 'editing done'
         
     def draw(self, screen):
         screen.fill((255,255,255),(self.color1rect.left-16, self.color1rect.top-48, 64+32, 32+72*3+16))
@@ -70,5 +88,6 @@ class Editor(object):
         screen.fill((80,80,80), self.imagerect.inflate(20,20))
         screen.blit(self.image.surf, self.imagerect)
         
+        screen.blit(self.donesurf, self.donerect)
         
         

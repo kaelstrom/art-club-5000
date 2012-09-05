@@ -6,14 +6,14 @@ def run_game():
 class Game(object):
     def __init__(self):
         pygame.init()
-        self.objects = []
-        self.gc = gallerycompare.GalleryCompare()
-        self.editor = editor.Editor()
-        pygame.display.set_caption('ARTCLUB 5000')
-        self.screen = pygame.display.set_mode((720,640))
         self.font = pygame.font.SysFont("pftempestaseven", 20)
         self.font48 = pygame.font.SysFont("pftempestaseven", 48)
-        self.editor.font = self.font
+        self.objects = []
+        self.gc = gallerycompare.GalleryCompare()
+        self.critic = critic.Critic(self.font)
+        self.editor = editor.Editor(self.font)
+        pygame.display.set_caption('ARTCLUB 5000')
+        self.screen = pygame.display.set_mode((720,640))
         self.generate_curtains()
         self.clock = pygame.time.Clock()
         self.running = True
@@ -29,11 +29,10 @@ class Game(object):
         self.actions['cycle image a'] = False
         self.actions['cycle image b'] = False
         self.actions['critic phase'] = True
+        self.actions['editor phase'] = False
         self.actions['draw gallery compare'] = True
         self.actions['draw editor'] = False
         self.actions['draw results'] = False
-        print os.getcwd()
-        self.critic = critic.Critic()
         self.game_loop()
         
     def generate_curtains(self):
@@ -78,10 +77,15 @@ class Game(object):
                 self.running = False
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    self.actions['cycle image b'] = True
-                if event.key == pygame.K_RIGHT:
-                    self.actions['cycle image a'] = True
+                if self.actions['critic phase']:
+                    if event.key == pygame.K_LEFT:
+                        self.actions['cycle image b'] = True
+                    if event.key == pygame.K_RIGHT:
+                        self.actions['cycle image a'] = True
+                    
+                if event.key == pygame.K_ESCAPE:  
+                    self.running = False
+                    sys.exit()
                     
             if self.actions['draw editor']:
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -109,6 +113,10 @@ class Game(object):
                 self.advance_a()
                 self.advance_b()
                 self.gc.set_images(self.images[self.image_a_index], self.images[self.image_b_index])
+                
+        if self.actions['editor phase']:
+            if self.editor.done:
+                self.end_editor_phase()
         
 
     def draw(self):
@@ -139,10 +147,11 @@ class Game(object):
             
             if self.actions['draw gallery compare'] == True:
                 self.actions['draw editor'] = True
+                self.actions['editor phase'] = True
                 self.actions['draw gallery compare'] = False
             elif self.actions['draw editor'] == True:
                 self.actions['draw results'] = True
-                self.actions['draw editor'] == False
+                self.actions['draw editor'] = False
         
     def draw_gc_text(self):
         text = ''
@@ -158,6 +167,13 @@ class Game(object):
         self.actions['critic phase'] = False
         self.curtain_percent = 0
         self.curtain_delta *= -1
+        
+    def end_editor_phase(self):
+        self.actions['editor phase'] = False
+        self.curtain_percent = 0
+        self.curtain_delta *= -1
+        self.critic.determine_profile()
+        self.critic.judge(self.editor.image)
         
     def advance_a(self):
         self.image_a_index = (self.image_a_index + 1) % len(self.images)

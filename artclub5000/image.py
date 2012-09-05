@@ -15,6 +15,9 @@ class Image(object):
         self.squares = 0
         self.stamp_size = 40
         self.judged = False
+        self.soul = 0
+        self.rating = 999
+        self.rank = 1
         
     def draw(self, screen):
         screen.blit(self.surf, self.rect)
@@ -30,9 +33,9 @@ class Image(object):
         self.colors = []
         for i in range(3):
             self.colors.append([randint(0,255), randint(0,255), randint(0,255)])
-        for i in range(randint(0,10)*2):
+        for i in range(randint(0,4)*5):
             self.squares += 1
             self.drawsquare(randint(0,240),randint(0,240), self.colors[randint(0,2)])
-        for i in range(randint(0,10)*2):
+        for i in range(randint(0,4)*5):
             self.circles += 1
             self.drawcircle(randint(0,240),randint(0,240), self.colors[randint(0,2)])
